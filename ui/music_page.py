@@ -3,7 +3,7 @@ import streamlit as st
 from models import melody_generator
 from ui import utility
 from audiocraft.models import MusicGen
-import streamlit as st 
+import streamlit as st  
 import torch 
 import torchaudio
 import os 
@@ -21,12 +21,9 @@ def generate_music_tensors(description, duration: int):
     model = load_model()
     import pickle
 
-# Load the dictionary from the .pkl file
     with open('C:/Users/Monty/Downloads/Musc/models/trained_models/dictionary.pkl', 'rb') as f:
         dictionary = pickle.load(f)
 
-# Now you can use the `dictionary` object
-# For example, you can print its contents
     print(dictionary)
 
     model.set_generation_params(
@@ -89,21 +86,30 @@ def main():
     text_area = st.text_area("Enter your description.......")
     time_slider = st.slider("Select time duration (In Seconds)", 0, 20, 10)
 
-    if text_area and time_slider:
-        st.json({
-            'Your Description': text_area,
-            'Selected Time Duration (in Seconds)': time_slider
-        })
+    generate_button = st.button("Generate Music")
 
-        st.subheader("Generated Music")
-        music_tensors = generate_music_tensors(text_area, time_slider)
-        print("Musci Tensors: ", music_tensors)
-        save_music_file = save_audio(music_tensors)
-        audio_filepath = 'audio_output/audio_0.wav'
-        audio_file = open(audio_filepath, 'rb')
-        audio_bytes = audio_file.read()
-        st.audio(audio_bytes)
-        st.markdown(get_binary_file_downloader_html(audio_filepath, 'Audio'), unsafe_allow_html=True)
+    if generate_button:
+        if text_area and time_slider:
+            st.json({
+                'Your Description': text_area,
+                'Selected Time Duration (in Seconds)': time_slider
+            })
+
+            st.subheader("Generating Music...")
+
+            progress_bar = st.progress(0)
+
+            music_tensors = generate_music_tensors(text_area, time_slider)
+            print("Musci Tensors: ", music_tensors)
+            save_music_file = save_audio(music_tensors)
+            audio_filepath = 'audio_output/audio_0.wav'
+            audio_file = open(audio_filepath, 'rb')
+            audio_bytes = audio_file.read()
+            st.audio(audio_bytes)
+            st.markdown(get_binary_file_downloader_html(audio_filepath, 'Audio'), unsafe_allow_html=True)
+            
+            progress_bar.empty()  # Clear progress bar once generation is complete
+
     
     st.markdown("---")
     st.write("Made by Manthan Vasant")
